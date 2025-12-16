@@ -1,0 +1,21 @@
+# SauceDemo Automation Project - Requirements
+# Install these packages using: pip install -r requirements.txt
+
+# Core Selenium package for browser automation
+selenium==4.15.2
+
+# WebDriver Manager for automatic driver management
+webdriver-manager==4.0.1
+
+# Pytest - Testing framework
+pytest==7.4.3
+
+# Pytest HTML Report Generator (Optional but recommended)
+pytest-html==4.1.1
+
+# Additional useful pytest plugins
+pytest-xdist==3.5.0  # For parallel test execution
+pytest-timeout==2.2.0  # For test timeout management
+
+# Note: These packages should already be installed in your environment
+# Run: pip install -r requirements.txt to ensure all dependencies are met
