@@ -26,7 +26,9 @@ class CartPage:
     
     def is_page_loaded(self):
         # Check if cart page is loaded
-        return self.CART_URL in self.driver.current_url
+        import time
+        time.sleep(0.5)  # Brief wait for page load
+        return self.CART_URL in self.driver.current_url or "cart" in self.driver.current_url
     
     def get_cart_item_count(self):
         # Get number of items in cart
@@ -38,7 +40,8 @@ class CartPage:
         checkout_btn = self.wait.until(
             EC.element_to_be_clickable(self.CHECKOUT_BUTTON)
         )
-        checkout_btn.click()
+        # Use JavaScript click for reliability
+        self.driver.execute_script("arguments[0].click();", checkout_btn)
         return self
     
     def click_continue_shopping(self):

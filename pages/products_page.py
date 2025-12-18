@@ -53,7 +53,8 @@ class ProductsPage:
         add_button = self.wait.until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, add_button_selector))
         )
-        add_button.click()
+        # Use JavaScript click for reliability
+        self.driver.execute_script("arguments[0].click();", add_button)
         return self
     
     def add_multiple_products_to_cart(self, product_names):
@@ -72,8 +73,11 @@ class ProductsPage:
     
     def click_cart_icon(self):
         # Click on shopping cart icon
-        cart_link = self.driver.find_element(*self.SHOPPING_CART_LINK)
-        cart_link.click()
+        cart_link = self.wait.until(
+            EC.element_to_be_clickable(self.SHOPPING_CART_LINK)
+        )
+        # Use JavaScript click for reliability
+        self.driver.execute_script("arguments[0].click();", cart_link)
         return self
     
     def open_hamburger_menu(self):

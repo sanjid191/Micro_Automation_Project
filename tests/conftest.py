@@ -12,9 +12,12 @@ def driver():
     # Scope: function - creates new browser instance for each test
     # Setup: Initialize Chrome driver
     service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service)
-    driver.maximize_window()
-    driver.implicitly_wait(10)
+    options = webdriver.ChromeOptions()
+    options.add_argument('--start-maximized')
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    driver = webdriver.Chrome(service=service, options=options)
+    driver.implicitly_wait(15)  # Increased wait time
     
     # Provide driver to test
     yield driver

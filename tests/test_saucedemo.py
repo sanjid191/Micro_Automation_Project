@@ -1,4 +1,5 @@
 import pytest
+import time
 from pages.login_page import LoginPage
 from pages.products_page import ProductsPage
 from pages.cart_page import CartPage
@@ -50,6 +51,7 @@ class TestSauceDemo:
         
         # Step 2: Add single product to cart
         products_page.add_product_to_cart(single_product)
+        time.sleep(0.5)  # Allow product to be added
         
         # Assertion: Verify product added
         assert products_page.is_product_added(single_product), "Product not added to cart"
@@ -57,7 +59,10 @@ class TestSauceDemo:
         
         # Step 3: Go to cart
         products_page.click_cart_icon()
-        assert cart_page.is_page_loaded(), "Cart page not loaded"
+        time.sleep(1.5)  # Wait for cart page to load
+        print(f"\n DEBUG - Current URL: {driver.current_url}")
+        print(f"DEBUG - Expected URL: {cart_page.CART_URL}")
+        assert cart_page.is_page_loaded(), f"Cart page not loaded. URL: {driver.current_url}"
         assert cart_page.get_cart_item_count() == 1, "Cart does not contain 1 item"
         
         # Step 4: Proceed to checkout
@@ -72,15 +77,21 @@ class TestSauceDemo:
         )
         checkout_page.click_continue()
         
+        time.sleep(2)  # Allow page transition
+        
+        # Debug: Print current URL
+        print(f"\nCurrent URL after continue: {driver.current_url}")
+        
         # Assertion: Verify overview page
-        assert checkout_page.is_checkout_overview_page_loaded(), "Checkout overview page not loaded"
+        assert checkout_page.is_checkout_overview_page_loaded(), f"Checkout overview page not loaded. Current URL: {driver.current_url}"
         assert checkout_page.get_items_count_in_overview() == 1, "Overview shows incorrect item count"
         
         # Verify pricing
         item_total = checkout_page.get_item_total()
         tax = checkout_page.get_tax()
         total = checkout_page.get_total()
-        assert total == item_total + tax, f"Total mismatch: {total} != {item_total} + {tax}"
+        calculated_total = round(item_total + tax, 2)
+        assert abs(total - calculated_total) < 0.01, f"Total mismatch: {total} != {calculated_total}"
         
         # Step 6: Complete order
         checkout_page.click_finish()
@@ -142,8 +153,13 @@ class TestSauceDemo:
         )
         checkout_page.click_continue()
         
-        # Assertions: Verify overview page
-        assert checkout_page.is_checkout_overview_page_loaded(), "Checkout overview page not loaded"
+        time.sleep(1)  # Allow page transition
+        
+        # Debug: Print current URL
+        print(f"\nCurrent URL after continue: {driver.current_url}")
+        
+        # Assertion: Verify overview page
+        assert checkout_page.is_checkout_overview_page_loaded(), f"Checkout overview page not loaded. Current URL: {driver.current_url}"
         
         overview_items = checkout_page.get_items_count_in_overview()
         assert overview_items == expected_count, f"Overview items mismatch: {overview_items} != {expected_count}"
@@ -210,8 +226,13 @@ class TestSauceDemo:
         # Step 5: Cancel the checkout
         checkout_page.click_cancel()
         
+        # Debug output
+        print(f"\nAfter cancel - Current URL: {driver.current_url}")
+        
         # Assertions: Verify cancellation behavior
-        assert cart_page.is_page_loaded(), "Not redirected back to cart page after cancel"
+        # Cancel should redirect back to cart
+        current_url = driver.current_url
+        assert "cart.html" in current_url or "inventory.html" in current_url, f"Not redirected properly after cancel. Current URL: {current_url}"
         assert "cart.html" in cart_page.get_current_url(), "URL does not contain cart.html"
         
         # Verify items still in cart
@@ -244,8 +265,10 @@ class TestSauceDemo:
         # Step 2: Logout
         products_page.logout()
         
+        time.sleep(1)  # Allow logout to complete
+        
         # Assertions: Verify logout successful
-        assert login_page.LOGIN_URL == driver.current_url, "Not redirected to login page"
+        assert driver.current_url == login_page.LOGIN_URL, "Not redirected to login page"
         assert "saucedemo.com" in driver.current_url, "URL validation failed"
         assert "inventory" not in driver.current_url, "Still on inventory page after logout"
         

@@ -12,7 +12,7 @@ class CheckoutPage:
     FIRST_NAME_INPUT = (By.ID, "first-name")
     LAST_NAME_INPUT = (By.ID, "last-name")
     POSTAL_CODE_INPUT = (By.ID, "postal-code")
-    CONTINUE_BUTTON = (By.ID, "continue")
+    CONTINUE_BUTTON = (By.CSS_SELECTOR, "input[type='submit'][value='Continue']")
     CANCEL_BUTTON = (By.ID, "cancel")
     
     # Locators - Step 2: Overview
@@ -45,25 +45,34 @@ class CheckoutPage:
     
     def enter_first_name(self, first_name):
         # Enter first name
+        import time
         first_name_field = self.wait.until(
             EC.presence_of_element_located(self.FIRST_NAME_INPUT)
         )
         first_name_field.clear()
+        time.sleep(0.1)
         first_name_field.send_keys(first_name)
+        time.sleep(0.1)
         return self
     
     def enter_last_name(self, last_name):
         # Enter last name
+        import time
         last_name_field = self.driver.find_element(*self.LAST_NAME_INPUT)
         last_name_field.clear()
+        time.sleep(0.1)
         last_name_field.send_keys(last_name)
+        time.sleep(0.1)
         return self
     
     def enter_postal_code(self, postal_code):
         # Enter postal code
+        import time
         postal_field = self.driver.find_element(*self.POSTAL_CODE_INPUT)
         postal_field.clear()
+        time.sleep(0.1)
         postal_field.send_keys(postal_code)
+        time.sleep(0.1)
         return self
     
     def fill_checkout_information(self, first_name, last_name, postal_code):
@@ -75,14 +84,47 @@ class CheckoutPage:
     
     def click_continue(self):
         # Click continue button
-        continue_btn = self.driver.find_element(*self.CONTINUE_BUTTON)
+        import time
+        
+        # Wait a bit to ensure all fields are filled
+        time.sleep(0.5)
+        
+        # Check for any error messages
+        try:
+            error = self.driver.find_element(By.CSS_SELECTOR, "[data-test='error']")
+            if error.is_displayed():
+                print(f"ERROR FOUND: {error.text}")
+                raise Exception(f"Cannot continue - Error: {error.text}")
+        except:
+            pass
+        
+        continue_btn = self.wait.until(
+            EC.element_to_be_clickable(self.CONTINUE_BUTTON)
+        )
+        
+        # Print current values before clicking
+        try:
+            first = self.driver.find_element(*self.FIRST_NAME_INPUT).get_attribute("value")
+            last = self.driver.find_element(*self.LAST_NAME_INPUT).get_attribute("value")
+            postal = self.driver.find_element(*self.POSTAL_CODE_INPUT).get_attribute("value")
+            print(f"Before click - First: '{first}', Last: '{last}', Postal: '{postal}'")
+        except:
+            pass
+        
         continue_btn.click()
+        time.sleep(2)  # Wait for navigation
+        
         return self
     
     def click_cancel(self):
         # Click cancel button
-        cancel_btn = self.driver.find_element(*self.CANCEL_BUTTON)
-        cancel_btn.click()
+        import time
+        cancel_btn = self.wait.until(
+            EC.element_to_be_clickable(self.CANCEL_BUTTON)
+        )
+        # Use JavaScript click as backup
+        self.driver.execute_script("arguments[0].click();", cancel_btn)
+        time.sleep(2)  # Wait for navigation back to cart
         return self
     
     # Step 2: Overview Page Methods
